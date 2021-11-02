@@ -1,27 +1,25 @@
 package com.zuochengyun.linked.demo;
 
-
-import java.util.LinkedList;
-
+import com.zuochengyun.linked.demo.DoubleNode;
 public class DeleteLastKth {
     public static void main(String[] args) {
         Node node = new Node(0);
         //为什么在赋值的时候要使用一个cur变量呢？为什么对原来的node变量进行赋值不对呢？
         Node cur = node;
-        for (int i = 1; i < 3; i++) {
+        for (int i = 1; i < 7; i++) {
             cur.next = new Node(i);
             cur = cur.next;
         }
         //System.out.println(node);
         DeleteLastKth deleteLastKth = new DeleteLastKth();
-        //Node lastNode = deleteLastKth.removeLastKth(node, 2);
-        //Node node1 = deleteLastKth.reverseList(node);
+        //com.zuochengyun.linked.demo1.Node lastNode = deleteLastKth.removeLastKth(node, 2);
+        //com.zuochengyun.linked.demo1.Node node1 = deleteLastKth.reverseList(node);
         //System.out.println(node1);
         //双向链表
         DoubleNode doubleNode = new DoubleNode(0);
         DoubleNode doublePre = doubleNode;
         DoubleNode doublelast = null;
-        for (int i = 1; i < 4; i++) {
+        for (int i = 1; i < 6; i++) {
             doublePre.next = new DoubleNode(i);
             doublePre.last = doublelast;
             doublelast = doublePre;
@@ -33,7 +31,8 @@ public class DeleteLastKth {
             doubleNode = doubleNode.next;
         }*/
         //System.out.println("doubleNode-----" + doubleNode.toString());
-        DoubleNode doubleNode1 = deleteLastKth.renerseListDoubleList(doubleNode);
+        //com.zuochengyun.linked.demo1.DoubleNode doubleNode1 = deleteLastKth.renerseListDoubleList(doubleNode);
+        Node doubleNode1 = deleteLastKth.reversePart(node, 1, 4);
 
         while (doubleNode1 != null) {
             System.out.println("doubleNode1----" + doubleNode1.value);
@@ -77,6 +76,68 @@ public class DeleteLastKth {
         return head;
     }
 
+    //删除链表的中间节点，如果是偶数，删除中间两个数字的前一个数。
+    public Node removeMidNode(Node head) {
+        /**
+         * 先找到规律，比如每增加两个节点删除的节点需要
+         */
+        //如果链表为空或者只有一个节点那么不删除直接返回
+        if (head == null || head.next == null) {
+            return head;
+        }
+        //如果链表有两个节点那么删除头节点
+        if (head.next.next == null) {
+            head = head.next;
+            return head;
+        }
+
+        //如果链表的长度为3，那么删除第二个节点
+        Node pre = head;
+        Node cur = head.next.next;
+        //如果链表的长度每增加2那么删除链表的节点向后移动一位。
+        while (cur.next != null && cur.next.next != null) {
+            pre = pre.next;
+            cur = cur.next.next;
+        }
+        pre.next = pre.next.next;
+        return head;
+    }
+
+
+
+    //删除链表a/b处的节点，a/b是一个分数。（具体规则看下书P46）
+    public Node removeByRatio(Node head, int a, int b) {
+        //需要找到删除的节点，删除的节点是链表的长度n*a/b。然后向上取整的节点。
+
+        //找到链表长度
+        int n = 0;
+        Node cur = head;
+        while (cur != null) {
+            n++;
+            cur = cur.next;
+        }
+        //找到要删除的节点d
+        double c = (double) a * n / (double) b;
+        int d = (int) Math.ceil(c);
+
+        if (d == 1) {
+            //删除头节点
+            head = head.next;
+        }
+        //删除头节点需要找到该节点的上一个节点。比如我要删除的是第2个节点。需要找到第一个节点，那我我应该先--，
+        //就找到了要删除节点的上一个节点。
+        if (d > 1) {
+            cur = head;
+            while (--d != 1) {
+                cur = cur.next;
+            }
+            cur.next = cur.next.next;
+        }
+        return cur;
+
+    }
+
+
     //反转单链表
     public Node reverseList(Node head) {
         Node pre = null;
@@ -105,77 +166,45 @@ public class DeleteLastKth {
     }
 
     //反转部分单项链表
-    /*public Double reversePart(Node head, int from, int to) {
-        //需要找到from前一个节点和to的后一个节点再进行链接
+    public Node reversePart(Node head, int from, int to) {
+        //找到需要反转的from节点的前一个节点，以及to节点的下一个节点
+        int len = 0;
         Node fPre = null;
         Node tPos = null;
-        int len = 0;
         Node node1 = head;
-        while (head != null) {
+        while (node1 != null) {
             len++;
             fPre = len == from - 1 ? node1 : fPre;
             tPos = len == to + 1 ? node1 : tPos;
             node1 = node1.next;
         }
-        //需要判断fPre是否为空，如果为空则反转包含头节点，如果不为空就正常反转中间的部分节点
-        node1 = fPre == null ? head : node1.next;
+        //判断需要反转链表是否正确
+        if (from > to || from < 1 || to > len) {
+            return head;
+        }
+        //判断是否需要换头，如果fPre为null，则需要换头
+        node1 = fPre == null ? head : fPre.next;
+        //开始反转
+        Node next = null;
+        Node node2 = node1.next;
+        node1.next = tPos;
+        while (node2 != tPos) {
+            next = node2.next;
+            node2.next = node1;
+            node1 = node2;
+            node2 = next;
+        }
+        //判断fPre是否为null
+        if (fPre != null) {
+            fPre.next = node1;
+            return head;
+        }
+        return node1;
 
-    }*/
+    }
+
+    //
 
 
 }
 
-class Node {
-    public Node next;
-    public int value;
-
-    public Node() {
-    }
-
-    public Node(int data) {
-        this.value = data;
-    }
-
-    public Node getNext() {
-        return next;
-    }
-
-    public void setNext(Node next) {
-        this.next = next;
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    public void setValue(int value) {
-        this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return "Node{" +
-                "next=" + next +
-                ", value=" + value +
-                '}';
-    }
-}
-
-class DoubleNode {
-    public int value;
-    public DoubleNode last;
-    public DoubleNode next;
-
-    public DoubleNode(int data) {
-        this.value = data;
-    }
-
-    /*@Override
-    public String toString() {
-        return "DoubleNode{" +
-                "value=" + value +
-                ", last=" + last +
-                ", next=" + next +
-                '}';
-    }*/
-}
